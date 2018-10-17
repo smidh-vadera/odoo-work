@@ -494,7 +494,6 @@ class account_analytic_account(models.Model):
     use_timesheets = fields.Boolean('Timesheets', default=True, help="Check this field if this project manages timesheets")
     date_end = fields.Datetime('Expiration Date')
     manager_id = fields.Many2one('res.users', string='Account Manager')
-    contract_type_id = fields.Many2one('account.analytic.account.contracttype', string='Contract Type')
 
     _defaults = {
         'recurring_interval': 1,
@@ -866,3 +865,18 @@ class account_analytic_account_summary_month(models.Model):
     #             ')')
 
 # vim:expandtab:smartindent:tabstop=4:softtabstop=4:shiftwidth=4:
+
+
+class res_partner(models.Model):
+    _inherit = 'res.partner'
+    
+    num_of_contracts_count = fields.Integer(compute='_compute_num_of_contracts_count', string="Contracts", type='integer')
+    
+    
+    @api.multi
+    def _compute_num_of_contracts_count(self):
+        obj = self.env['account.analytic.account']
+        for partner in self:
+            partner.num_of_contracts_count = obj.search_count([('partner_id', '=', partner.id)])
+    
+    
